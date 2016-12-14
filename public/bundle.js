@@ -12453,20 +12453,52 @@ module.exports = [
 ]
 
 },{}],85:[function(require,module,exports){
-var yo = require('yo-yo')
+// --- view --- //
+var html = require('yo-yo')
 
 module.exports = (state, dispatch) => {
-  console.log('game from state:');
-  console.log(state.game);
-  
-  return yo`
+  _dispatch = dispatch
+
+  return html`
     <div>
       <h1>snakes</h1>
       <h2>game</h2>
       <hr>
+      ${renderBoard()}
     </div>
   `
 }
+
+function renderBoard (state, size) {
+  return html`
+    <table>
+      <tr>
+        <td>x</td>
+        <td>x</td>
+        <td>x</td>
+      </tr>
+      <tr>
+        <td>x</td>
+        <td>x</td>
+        <td>x</td>
+      </tr>
+      <tr>
+        <td>x</td>
+        <td>x</td>
+        <td>x</td>
+      </tr>
+    </table>
+  `
+}
+
+// --- socket --- //
+var _dispatch
+
+// io.emit('join-lobby')
+
+io.on('receive-game-state', (gameState) => {
+  _dispatch({ type: 'UPDATE_GAME_STATE', payload: gameState })
+})
 
 },{"yo-yo":83}],86:[function(require,module,exports){
 // --- view --- //
@@ -12491,7 +12523,7 @@ function renderGames (games) {
     return html`
       <div>
         <h2>${game.hostid}</h2>
-        <button onclick=${joinGame}>join game</button>
+        <button onclick=${requestJoinGame}>join game</button>
       </div>
     `
   })
@@ -12504,7 +12536,7 @@ function hostGame () {
   io.emit('host-game')
 }
 
-function joinGame (e) {
+function requestJoinGame (e) {
   var gameid = e.target.previousElementSibling.innerHTML
   io.emit('request-join-game', gameid)
 }
@@ -12535,7 +12567,6 @@ module.exports = (state, action) => {
     return newState
 
     case 'JOIN_GAME':
-    console.log('joining game');
       newState.page = 'game'
       newState.game = action.payload
     return newState

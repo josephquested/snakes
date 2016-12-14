@@ -20,7 +20,7 @@ function renderGames (games) {
     return html`
       <div>
         <h2>${game.hostid}</h2>
-        <button onclick=${joinGame}>join game</button>
+        <button onclick=${requestJoinGame}>join game</button>
       </div>
     `
   })
@@ -33,7 +33,7 @@ function hostGame () {
   io.emit('host-game')
 }
 
-function joinGame (e) {
+function requestJoinGame (e) {
   var gameid = e.target.previousElementSibling.innerHTML
   io.emit('request-join-game', gameid)
 }
