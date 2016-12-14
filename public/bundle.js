@@ -12455,7 +12455,7 @@ module.exports = [
 },{}],85:[function(require,module,exports){
 var yo = require('yo-yo')
 
-module.exports = (state, dispatch) => {
+module.exports = (state, dispatch, io) => {
   return yo`
     <div>
       <h1>snakes</h1>
@@ -12466,41 +12466,79 @@ module.exports = (state, dispatch) => {
 }
 
 },{"yo-yo":83}],86:[function(require,module,exports){
-var yo = require('yo-yo')
+// --- view --- //
+var html = require('yo-yo')
 
 module.exports = (state, dispatch) => {
-  return yo`
+  _dispatch = dispatch
+
+  return html`
     <div>
       <h1>snakes</h1>
       <h2>lobby</h2>
+      <button onclick=${hostGame}>host game</button>
       <hr>
+      ${renderGames(state.games)}
     </div>
   `
 }
-  
+
+function renderGames (games) {
+  return games.map((game) => {
+    return html`
+      <h2>${game.hostid}</h2>
+    `
+  })
+}
+
+// --- socket --- //
+var _dispatch
+
+function hostGame () {
+  io.emit('host-game')
+}
+
+io.emit('join-lobby')
+
+io.on('join-game', (game) => {
+  console.log('joining game!');
+})
+
+io.on('receive-games', (games) => {
+  _dispatch({ type: 'UPDATE_GAMES', payload: games })
+})
 
 },{"yo-yo":83}],87:[function(require,module,exports){
+module.exports = {
+  page: 'lobby',
+  games: []
+}
+
+},{}],88:[function(require,module,exports){
 module.exports = (state, action) => {
   var newState = require('clone')(state)
 
   switch (action.type) {
-    case 'INIT':
-      return newState
+    case 'UPDATE_GAMES':
+      newState.games = action.payload
+    return newState
 
     default:
-      return newState
+    return newState
   }
 }
 
-},{"clone":10}],88:[function(require,module,exports){
+},{"clone":10}],89:[function(require,module,exports){
+(function (global){
 var redux = require('redux')
 var morphdom = require('morphdom')
 var reducer = require('./reducer')
 
 var app = document.createElement('div')
 document.querySelector('main').appendChild(app)
+global.io = require('socket.io-client')('http://localhost:3000/')
 
-var initialState = { page: 'lobby' }
+var initialState = require('./initial-state')
 var store = redux.createStore(reducer, initialState)
 
 store.subscribe(() => {
@@ -12508,18 +12546,18 @@ store.subscribe(() => {
   morphdom(app, view)
 })
 
-var io = require('socket.io-client')('http://localhost:3000/')
-
 function render (state, dispatch, io) {
   switch (state.page) {
     case 'lobby':
       return require('./components/lobby')(state, store.dispatch, io)
+    break
 
     case 'game':
       return require('./components/game')(state, store.dispatch, io)
   }
 }
 
-store.dispatch({type: 'INIT'})
+store.dispatch({ type: 'INIT' })
 
-},{"./components/game":85,"./components/lobby":86,"./reducer":87,"morphdom":50,"redux":62,"socket.io-client":64}]},{},[88]);
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./components/game":85,"./components/lobby":86,"./initial-state":87,"./reducer":88,"morphdom":50,"redux":62,"socket.io-client":64}]},{},[89]);
