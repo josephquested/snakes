@@ -33,7 +33,8 @@ function hostGame () {
 io.emit('join-lobby')
 
 io.on('join-game', (game) => {
-  console.log('joining game!');
+  console.log('joining game!')
+  _dispatch({ type: 'JOIN_GAME', payload: game })
 })
 
 io.on('receive-games', (games) => {

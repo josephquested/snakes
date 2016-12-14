@@ -6,6 +6,11 @@ module.exports = (state, action) => {
       newState.games = action.payload
     return newState
 
+    case 'JOIN_GAME':
+      newState.page = 'game'
+      newState.gameid = action.payload
+    return newState
+
     default:
     return newState
   }

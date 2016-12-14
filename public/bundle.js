@@ -12501,7 +12501,8 @@ function hostGame () {
 io.emit('join-lobby')
 
 io.on('join-game', (game) => {
-  console.log('joining game!');
+  console.log('joining game!')
+  _dispatch({ type: 'JOIN_GAME', payload: game })
 })
 
 io.on('receive-games', (games) => {
@@ -12521,6 +12522,11 @@ module.exports = (state, action) => {
   switch (action.type) {
     case 'UPDATE_GAMES':
       newState.games = action.payload
+    return newState
+
+    case 'JOIN_GAME':
+      newState.page = 'game'
+      newState.gameid = action.payload
     return newState
 
     default:
