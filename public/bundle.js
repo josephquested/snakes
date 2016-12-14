@@ -12455,7 +12455,10 @@ module.exports = [
 },{}],85:[function(require,module,exports){
 var yo = require('yo-yo')
 
-module.exports = (state, dispatch, io) => {
+module.exports = (state, dispatch) => {
+  console.log('game from state:');
+  console.log(state.game);
+  
   return yo`
     <div>
       <h1>snakes</h1>
@@ -12486,7 +12489,10 @@ module.exports = (state, dispatch) => {
 function renderGames (games) {
   return games.map((game) => {
     return html`
-      <h2>${game.hostid}</h2>
+      <div>
+        <h2>${game.hostid}</h2>
+        <button onclick=${joinGame}>join game</button>
+      </div>
     `
   })
 }
@@ -12498,10 +12504,14 @@ function hostGame () {
   io.emit('host-game')
 }
 
+function joinGame (e) {
+  var gameid = e.target.previousElementSibling.innerHTML
+  io.emit('request-join-game', gameid)
+}
+
 io.emit('join-lobby')
 
 io.on('join-game', (game) => {
-  console.log('joining game!')
   _dispatch({ type: 'JOIN_GAME', payload: game })
 })
 
@@ -12525,8 +12535,9 @@ module.exports = (state, action) => {
     return newState
 
     case 'JOIN_GAME':
+    console.log('joining game');
       newState.page = 'game'
-      newState.gameid = action.payload
+      newState.game = action.payload
     return newState
 
     default:

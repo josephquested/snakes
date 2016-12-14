@@ -3,11 +3,20 @@ module.exports = (connection) => {
   io.games = []
 
   io.on('connection', (socket) => {
-    console.log(`${socket.id} connected`)
-
     socket.on('join-lobby', () => {
       socket.join('lobby')
       io.to('lobby').emit('receive-games', io.games)
+    })
+
+    socket.on('request-join-game', (hostid) => {
+      var game = io.games.find(game => game.hostid == hostid)
+      if (!game.guestid) {
+        game.guestid = socket.id
+        io.to('lobby').emit('receive-games', io.games)
+        io.to(socket.id).emit('join-game', game)
+      } else {
+        // spectate
+      }
     })
 
     socket.on('host-game', () => {

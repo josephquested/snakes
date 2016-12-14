@@ -7,8 +7,9 @@ module.exports = (state, action) => {
     return newState
 
     case 'JOIN_GAME':
+    console.log('joining game');
       newState.page = 'game'
-      newState.gameid = action.payload
+      newState.game = action.payload
     return newState
 
     default:
